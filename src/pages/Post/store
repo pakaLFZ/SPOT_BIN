@@ -1,0 +1,399 @@
+import React, {
+    useState,
+} from 'react'
+
+import {
+    withRouter,
+    useHistory
+} from 'react-router-dom'
+
+import {
+    useDispatch,  //发送请求
+    useSelector   //获得数据
+} from 'react-redux' // 发送请求的
+
+import {
+    sendSparkle,
+    getTags
+} from 'actions/sparkle'
+
+import {
+    Space,
+    Input,
+    Button,
+    Result,
+    Divider,
+    Tooltip
+} from "antd"
+import { postLink } from "component/config/general"
+
+import BraftEditor from 'braft-editor';
+import styles from './post.less'
+import Blue from "component/Blue/index.jsx"
+import UploadButton from "component/Upload/Button.jsx"
+
+export default withRouter(Page)
+
+function Page(props){
+    const { TextArea } = Input;
+    const dispatch = useDispatch();
+    const edit = props.edit;
+
+    const [ content, setContent ] = useState(null);
+    const [ mission, setMission ] = useState(null);
+    const [ name, setName ] = useState(null);
+    const [ fileList, setFileList] = useState([]);
+    const [ cover, setCover ] = useState(null);
+    const [ f, sf ] = useState(true)
+    const [ tagList, setTagList ] = useState([]);
+    
+    const { tags, sparkleInfo} = useSelector(state => state.sparkle);
+
+    function post(){
+        if (name && mission && content) {
+            if (!cover) { 
+                alert("Shall we upload a cover image?")
+            } else {
+
+                const jsonData = {
+                    content: content,
+                    mission: mission,
+                    name: name,
+                    cover: cover,
+                    tags: tagList
+                }
+                if (confirm("Are you sure you want to post this project now?")) {
+                    console.log(jsonData);
+                    dispatch(sendSparkle(jsonData))
+                }
+            }
+        }
+        else alert("Please fill in all necessary information!")
+
+
+    }
+    function refreshData(data){
+        console.log(data);
+        setFileList(data)
+        setCover(data[0])
+    }
+    function removeTag(item) {
+        const no = tagList.indexOf(item.id);
+        console.log("Remove");
+
+        console.log("no", no);
+        console.log("tagList-b", tagList);
+
+        let tags = tagList;
+        tags = tags.splice(no, 1)
+        setTagList(tags);
+
+        console.log("tagList-a", tagList);
+    }
+    function addTag(item){
+        console.log("Add");
+        console.log("tagList-b", tagList);
+
+        setTagList([...tagList, item.id])
+        console.log("tagList-a", tagList);
+    }
+
+
+    if(f) {
+        dispatch(getTags())
+        if (edit) {
+            setContent(sparkleInfo.content)
+            setMission(sparkleInfo.mission)
+            setName(sparkleInfo.title)
+            setCover(sparkleInfo.cover)
+            setTagList(tagDataAnalysor(sparkleInfo.tags))
+        }
+        sf(false)
+        console.log("active");
+    }
+
+    
+
+    return (
+        <div className={styles.mainContainer}>      
+            <div className={styles.divider}>
+                <Divider><h3>Post Project</h3></Divider>
+            </div>
+            {/* <Button onClick={()=>console.log(sparkleInfo)}>vuhv</Button>       */}
+
+
+            <div className={styles.details}>
+                <Divider orientation="left">Project Name</Divider>
+                <Input onChange={(e)=>setName(e.target.value)}/>
+
+                <Divider orientation="left">Tags</Divider>
+                {
+                    tags?
+                    <Space>
+                        {
+                            tags.map(
+                                (item, id)=>(
+                                    tagList.indexOf(item.id) > -1 ?
+                                   <Tooltip title="Remove" key={id}>
+                                        <Button 
+                                            type="primary"
+                                            onClick={ ()=>removeTag(item)}
+                                            shape="round"
+                                        >{item.title}</Button>
+                                   </Tooltip>
+                                    : 
+                                    <Tooltip title="Add" key={id}>
+                                        <Button
+                                            onClick={()=>addTag(item)}
+                                            shape="round"
+                                        >{item.title}</Button>
+                                    </Tooltip>
+                                )
+                            )
+                        }
+                    </Space>
+                    : <p>Loading...</p>
+
+                }
+
+
+                <Divider orientation="left">Mission Statement</Divider>
+                <TextArea onChange={(e)=>setMission(e.target.value)}/>
+                <Divider orientation="left">Project Description</Divider>
+                <Editor setContent={(e)=>setContent(e)}></Editor>
+
+                <Divider orientation="left">Upload Cover</Divider>
+                <UploadButton
+                    setFileList={(e)=>refreshData(e)}
+                    fileList={fileList}
+                    actionType="post_file"
+                />
+                {
+                    cover ?
+                    <img src={postLink + cover} className={styles.cover}/>
+                    : <h2>No Image</h2>
+
+                }
+
+                <br/>
+                <br/>
+                <br/>
+                <br/>
+                <Button type="primary" onClick={()=>post()}>Submit</Button>
+                
+            </div>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+            <br/>
+        </div>
+    )
+}
+
+function Success(){
+    return (
+        <div className={styles.mainContainer}>
+            <div className={styles.blue}>
+                <Blue/>
+            </div>
+            
+            <TopNavBar/>
+            <div className={styles.success}>
+                <Result
+                    status="success"
+                    title="Success"
+                    subTitle="You have successfully posts your opportunity information on SPOT!"
+                    extra={[
+                    <Button type="primary" key="console">
+                        Back
+                    </Button>,
+                    ]}
+                />
+            </div>
+            
+        </div>
+        
+    )
+}
+
+function formDataAnalysor(data){
+    let json = {
+        title: null,
+        subject: null,
+        teamMembers: null,
+        location: null,
+        mission: null,
+        qualification: null,
+        targetMarket: null,
+        otherInfo: null,
+        opportunity: null,
+        contactInfo: null,
+    }
+    for(var i = 0; i <=8; i++){
+        const item = data[i]
+        const name = item.name[0]
+        console.log(name);
+        if (name == "subject" && item.value) json["subject"] = item.value
+        else if (name == "title" && item.value) json["title"] = item.value
+        else if (name == "location" && item.value) json["location"] = item.value
+        else if (name == "teamMembers" && item.value) json["teamMembers"] = item.value
+        else if (name == "mission" && item.value) json["mission"] = item.value
+        else if (name == "qualification" && item.value) json["qualification"] = item.value
+        else if (name == "targetMarket" && item.value) json["targetMarket"] = item.value
+        else if (name == "otherInfo" && item.value) json["otherInfo"] = item.value
+        else if (name == "opportunity" && item.value) json["opportunity"] = item.value
+        else if (name == "contactInfo" && item.value) json["contactInfo"] = item.value
+    }
+    console.log(json);
+    return json
+}
+
+const myUploadFn = (param) => {
+
+    const serverURL = '/api/databank/upload'
+    const xhr = new XMLHttpRequest
+    const fd = new FormData()
+  
+    const successFn = (response) => {
+      // 假设服务端直接返回文件上传后的地址
+      // 上传成功后调用param.success并传入上传后的文件地址
+      param.success({
+        url: response.target.response.url,
+        // meta: {
+        //   id: 'xxx',
+        //   title: 'xxx',
+        //   alt: 'xxx',
+        //   loop: true, // 指定音视频是否循环播放
+        //   autoPlay: true, // 指定音视频是否自动播放
+        //   controls: true, // 指定音视频是否显示控制栏
+        //   poster: 'http://xxx/xx.png', // 指定视频播放器的封面
+        // }
+      })
+    }
+  
+    const progressFn = (event) => {
+      // 上传进度发生变化时调用param.progress
+      param.progress(event.loaded / event.total * 100)
+    }
+  
+    const errorFn = (response) => {
+      // 上传发生错误时调用param.error
+      param.error({
+        msg: 'unable to upload.'
+      })
+    }
+  
+    xhr.upload.addEventListener("progress", progressFn, false)
+    xhr.addEventListener("load", successFn, false)
+    xhr.addEventListener("error", errorFn, false)
+    xhr.addEventListener("abort", errorFn, false)
+    xhr.responseType = 'json';
+  
+  
+  
+    fd.append('file', param.file)
+    fd.append('actionType', "post_img")
+    fd.append("uid", uuid())
+  
+    xhr.open('POST', serverURL, true)
+    // xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.send(fd)
+  
+}
+
+class Editor extends React.Component {
+
+state = {
+    // 创建一个空的editorState作为初始值
+    editorState: BraftEditor.createEditorState(this.props.iniContent)
+}
+
+async componentDidMount () {
+    // 假设此处从服务端获取html格式的编辑器内容
+    const htmlContent = await fetchEditorContent()
+    // 使用BraftEditor.createEditorState将html字符串转换为编辑器需要的editorStat
+    this.setState({
+        editorState: BraftEditor.createEditorState(htmlContent)
+    })
+}
+
+// submitContent = async () => {
+//     // 在编辑器获得焦点时按下ctrl+s会执行此方法
+//     // 编辑器内容提交到服务端之前，可直接调用editorState.toHTML()来获取HTML格式的内容
+//     const htmlContent = this.state.editorState.toHTML()
+//     // const result = await saveEditorContent(htmlContent)
+//     this.props.setContent(htmlContent);
+//     console.log(htmlContent);
+//     console.log(this.props.a);
+// }
+
+handleEditorChange = (editorState) => {
+    this.setState({ editorState })
+    const htmlContent = this.state.editorState.toHTML();
+    this.props.setContent(htmlContent);
+    console.log(htmlContent);
+    console.log(this.props.a);
+}
+
+render () {
+    const { editorState } = this.state
+    return (
+        <div className="my-component">
+            <BraftEditor
+                value={editorState}
+                onChange={this.handleEditorChange}
+                // onSave={this.submitContent}
+                media={{uploadFn: myUploadFn}}
+            />
+        </div>
+    )
+
+}
+
+}
+
+function uuid() {
+    const len = 8;
+    const radix = 16;
+    //https://blog.csdn.net/mr_raptor/article/details/52280753
+    var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+    var uuid = [], i;
+    const radix_1 = radix || chars.length;
+    if (len) {
+        // Compact form
+        for (i = 0; i < len; i++) uuid[i] = chars[0 | Math.random()*radix_1];
+    } else {
+        // rfc4122, version 4 form
+        var r;
+        // rfc4122 requires these characters
+        uuid[8] = uuid[13] = uuid[18] = uuid[23] = '-';
+        uuid[14] = '4';
+        // Fill in random data.  At i==19 set the high bits of clock sequence as
+        // per rfc4122, sec. 4.1.5
+        for (i = 0; i < 36; i++) {
+        if (!uuid[i]) {
+            r = 0 | Math.random()*16;
+            uuid[i] = chars[(i == 19) ? (r & 0x3) | 0x8 : r];
+
+        }
+        }
+    }
+    return uuid.join('');
+
+}
+
+function tagDataAnalysor(data){
+    let tagList = []
+    data.map(
+        (item, id)=>{
+            tagList = [ ...tagList, item.id]
+        }
+    )
+    
+    return tagList
+}

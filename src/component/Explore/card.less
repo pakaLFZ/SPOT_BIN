@@ -1,0 +1,102 @@
+@coverHeight: 135px;
+@coverWidth: @coverHeight;
+@width: 380px;
+@height: 190px;
+
+
+.container {
+    position: relative;
+    width: @width;
+    height: @height;
+    border: solid;
+    border-radius: 10px;
+    border-color: gray;
+    border-width: 0.01px;
+    overflow: hidden;
+    transition: 0.2s;
+}
+
+.content {
+    position: relative;
+    float: right;
+    top: 5px;
+    width: calc(100% - @coverWidth - 50px);
+    height: 100%;
+    overflow: hidden;
+}
+
+.cover {
+    position: relative;
+    top: 10px;
+    left: 25px;
+    height: calc(100% - 20px);
+    width: @coverWidth;
+    float: left;
+    overflow: hidden;
+    img {
+        position: absolute;
+        top:0;
+        bottom:0;
+        left:0;
+        right:0;
+        margin:auto;
+        max-width: @coverWidth;
+        max-height: @coverHeight;
+
+    }
+}
+
+.title {
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 22px;
+}
+.description {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: @width;
+    height: @height;
+    background-color: white;
+    border-radius: 10px;
+    transition: 0.3s;
+    opacity: 0;
+    z-index: 10;
+    cursor: pointer;
+    h3 {
+        text-align: center;
+        margin-top: 5px;
+    }
+    div {
+        margin-left: 5px;
+    }
+
+}
+
+.description:hover {
+    opacity: 1;
+    transition: 0.5s;
+}
+
+.tags {
+    display: flex;
+    flex-wrap: nowrap;
+    p {
+        color: grey;
+        line-height: 10px;
+        white-space: nowrap;
+    }
+}
+
+@colorLine_width: 10px;
+@colorLine_top: 10px;
+.colorBorder {
+    position: absolute;
+    left: 0px;
+    top: 0;
+    height: calc(@height);
+    width: @colorLine_width;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}

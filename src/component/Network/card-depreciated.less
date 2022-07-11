@@ -1,0 +1,76 @@
+@avatarWidth: 70px;
+@contentWidth: 200px;
+@contentHeight: 160px;
+
+.content {
+    position: relative;
+    float: right;
+    width: @contentWidth;
+    height: @contentHeight;
+    // border: dashed;
+}
+
+.author {
+    position: relative;
+    height: 40px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    p {
+        line-height: 38px;
+        font-size: 12px;
+        margin-left: 5px;
+        margin-right: 5px;
+
+    }
+}
+
+.cover {
+    // border: dashed;
+    position: relative;
+    height: @contentHeight;
+    width: @avatarWidth;
+    float: left;
+    margin-right: 30px;
+    overflow: hidden;
+    // line-height: @contentHeight;
+}
+.avatar {
+    position: relative;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+}
+
+.like {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    z-index: 3;
+}
+
+.title {
+    position: relative;
+    float: left;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 22px;
+}
+.description {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: @avatarWidth + @contentWidth + 30px;
+    height: @contentHeight;
+    background-color: white;
+    transition: 0.3s;
+    opacity: 0;
+    h3 {
+        text-align: center;
+    }
+}
+
+.description:hover {
+    opacity: 1;
+    transition: 0.5s;
+}
